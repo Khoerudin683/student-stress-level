@@ -121,19 +121,14 @@ elif page == "Data Description":
 
     data = load_data()
 
-    st.subheader("📈 Model Evaluation on Dummy Data")
+   st.subheader("📈 Model Evaluation on Dummy Data")
 
-    # Load model (pastikan sudah diload di awal skrip seperti yang kamu lakukan dengan `model = load_model()`)
     model = load_model()
-
-    # Siapkan data untuk evaluasi
-    data_eval = load_data()
-    reverse_mapping = {"Low": 0, "Moderate": 1, "High": 2}
-    data_eval["Level"] = data_eval["Level"].map(reverse_mapping)
-
+    data_eval = load_data()  # Level masih dalam format numerik (0,1,2)
+    
     X_eval = data_eval.drop(columns=["Level"])
-    y_eval = data_eval["Level"]
-
+    y_eval = data_eval["Level"]  # Ini tetap 0,1,2
+    
     expected_columns = [
         "Study_Hours_Per_Day",
         "Extracurricular_Hours_Per_Day",
@@ -144,33 +139,32 @@ elif page == "Data Description":
         "Academic_Performance_Encoded"
     ]
     X_eval = X_eval[expected_columns]
-
-    # Prediksi dan evaluasi
+    
     y_pred_eval = model.predict(X_eval)
     y_proba_eval = model.predict_proba(X_eval)
-
-    acc = accuracy_score(y_eval, y_pred_eval)
-    st.metric("Accuracy", f"{acc:.2f}")
-
-    # Classification Report
-    st.markdown("### 📋 Classification Report")
-    report = classification_report(y_eval, y_pred_eval, target_names=["Low", "Moderate", "High"])
-    st.text(report)
-
-    # Confusion Matrix
-    st.markdown("### 🔍 Confusion Matrix")
-    fig_cm = plot_confusion_matrix(y_eval, y_pred_eval, ["Low", "Moderate", "High"])
-    st.pyplot(fig_cm)
-
-    # ROC Curve
-    st.markdown("### 🧪 ROC Curve")
-    fig_roc = plot_roc_curve(y_eval, y_proba_eval, [0, 1, 2])
-    st.pyplot(fig_roc)
-
-    # Precision-Recall Curve
-    st.markdown("### 🎯 Precision-Recall Curve")
-    fig_pr = plot_precision_recall_curve(y_eval, y_proba_eval, [0, 1, 2])
-    st.pyplot(fig_pr)
+    
+    # Check NaNs sebelum skor
+    if y_eval.isna().sum() > 0:
+        st.error("y_eval contains NaNs. Check label mapping.")
+    else:
+        acc = accuracy_score(y_eval, y_pred_eval)
+        st.metric("Accuracy", f"{acc:.2f}")
+    
+        st.markdown("### 📋 Classification Report")
+        report = classification_report(y_eval, y_pred_eval, target_names=["Low", "Moderate", "High"])
+        st.text(report)
+    
+        st.markdown("### 🔍 Confusion Matrix")
+        fig_cm = plot_confusion_matrix(y_eval, y_pred_eval, ["Low", "Moderate", "High"])
+        st.pyplot(fig_cm)
+    
+        st.markdown("### 🧪 ROC Curve")
+        fig_roc = plot_roc_curve(y_eval, y_proba_eval, [0, 1, 2])
+        st.pyplot(fig_roc)
+    
+        st.markdown("### 🎯 Precision-Recall Curve")
+        fig_pr = plot_precision_recall_curve(y_eval, y_proba_eval, [0, 1, 2])
+        st.pyplot(fig_pr)
 
 
 
