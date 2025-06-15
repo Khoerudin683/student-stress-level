@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pickle
-from sklearn.metrics import confusion_matrix, roc_curve, auc, precision_recall_curve, ConfusionMatrixDisplay
+from sklearn.metrics import confusion_matrix, roc_curve, auc, precision_recall_curve, ConfusionMatrixDisplay,accuracy_score, classification_report
 from sklearn.preprocessing import label_binarize
 
 # Fungsi untuk load model
@@ -120,6 +120,48 @@ elif page == "Data Description":
     """)
 
     data = load_data()
+
+    # Pisahkan fitur dan label
+    X = df.drop("Personality", axis=1)
+    y = df["Personality"]
+    
+    # Konversi nilai kategorik jadi numerik jika perlu
+    X = X.copy()
+    for col in X.columns:
+        if X[col].dtype == "object":
+            X[col] = X[col].map({"Yes": 1, "No": 0})
+    
+    # Encode label
+    from sklearn.preprocessing import LabelEncoder
+    le = LabelEncoder()
+    y_encoded = le.fit_transform(y)
+    
+    # Bagi data (untuk evaluasi)
+    from sklearn.model_selection import train_test_split
+    X_train, X_test, y_train, y_test = train_test_split(X, y_encoded, test_size=0.2, random_state=42)
+    
+    # Prediksi dan evaluasi
+    y_pred = model.predict(X_test)
+    acc = accuracy_score(y_test, y_pred)
+    report = classification_report(y_test, y_pred, target_names=le.classes_)
+    cm = confusion_matrix(y_test, y_pred)
+    
+    # Tampilkan hasil evaluasi
+    st.subheader("🎯 Akurasi Model")
+    st.success(f"Akurasi Model XGBoost: {acc:.4f}")
+    
+    st.subheader("📄 Classification Report")
+    st.code(report)
+    
+    st.subheader("🔍 Confusion Matrix")
+    fig, ax = plt.subplots()
+    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", 
+                xticklabels=le.classes_, yticklabels=le.classes_, ax=ax)
+    plt.xlabel("Prediksi")
+    plt.ylabel("Aktual")
+    plt.title("Confusion Matrix - XGBoost")
+    st.pyplot(fig)
+
     
     # Mapping kolom Level menjadi label kategori
     label_mapping = {0: "Low", 1: "Moderate", 2: "High"}
