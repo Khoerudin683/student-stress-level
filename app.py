@@ -121,7 +121,7 @@ elif page == "Data Description":
 
     data = load_data()
 
-    st.
+    st.pyplot(fig)
 
     
     # Mapping kolom Level menjadi label kategori
@@ -155,8 +155,7 @@ elif page == "Data Description":
     st.pyplot(fig)
 
     data = load_data()
-
-    st.pyplot(fig)    
+   
     # Pastikan mapping dilakukan SEBELUM scatter plot
     label_mapping = {0: "Low", 1: "Moderate", 2: "High"}
     data["Level"] = data["Level"].map(label_mapping)
