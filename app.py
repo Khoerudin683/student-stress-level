@@ -121,7 +121,7 @@ elif page == "Data Description":
 
     data = load_data()
 
-   st.subheader("📈 Model Evaluation on Dummy Data")
+    st.subheader("📈 Model Evaluation on Dummy Data")
 
     model = load_model()
     data_eval = load_data()  # Level masih dalam format numerik (0,1,2)
